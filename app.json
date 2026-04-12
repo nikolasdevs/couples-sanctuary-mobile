@@ -15,7 +15,10 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.visit2nigeria.sanctuary"
+      "bundleIdentifier": "com.visit2nigeria.sanctuary",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -27,6 +30,12 @@
     },
     "plugins": [
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "32794b98-2c55-47dd-8ff4-d8173e0f3906"
+      }
+    },
+    "owner": "nikolasdevs"
   }
 }
