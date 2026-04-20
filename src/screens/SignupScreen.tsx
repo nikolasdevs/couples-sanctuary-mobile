@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore } from "@/store/authStore";
@@ -22,17 +23,26 @@ export default function SignupScreen({ navigation }: Props) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   const handleSignup = async () => {
+    if (!EMAIL_RE.test(email.trim())) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
     setError("");
     setLoading(true);
-    const err = await signup(email.trim().toLowerCase(), password, name.trim());
-    if (err) {
-      setError(err);
-      setLoading(false);
-    }
+    const err = await signup(email, password, name);
+    setLoading(false);
+    if (err) setError(err);
   };
 
   return (
@@ -103,20 +113,31 @@ export default function SignupScreen({ navigation }: Props) {
                 <Text className="text-xs text-zinc-400 font-medium mb-1.5">
                   Password
                 </Text>
-                <TextInput
-                  value={password}
-                  onChangeText={setPassword}
-                  placeholder="At least 6 characters"
-                  placeholderTextColor="#52525b"
-                  secureTextEntry
-                  autoComplete="new-password"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm"
-                />
+                <View className="relative">
+                  <TextInput
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholder="At least 8 characters"
+                    placeholderTextColor="#52525b"
+                    secureTextEntry={!showPassword}
+                    autoComplete="new-password"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 pr-12 text-white text-sm"
+                  />
+                  <TouchableOpacity
+                    onPress={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-3"
+                    accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+                  >
+                    <Text className="text-zinc-500 text-sm">
+                      {showPassword ? "Hide" : "Show"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
 
               <Pressable
                 onPress={handleSignup}
-                disabled={loading || !name || !email || !password}
+                disabled={loading || !name.trim() || !email || !password}
                 className="w-full bg-rose-600 rounded-full py-3.5 mt-2 active:opacity-80 disabled:opacity-50"
               >
                 <Text className="text-white text-center text-sm font-semibold">

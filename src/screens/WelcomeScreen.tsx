@@ -44,8 +44,7 @@ export default function WelcomeScreen({ navigation }: Props) {
         </View>
 
         <Text className="text-xs text-zinc-600 text-center mt-8">
-          Nothing is saved to any server.{"\n"}This moment belongs only to the
-          two of you.
+          Your data is private and only shared{"\n"}between you and your partner.
         </Text>
       </View>
     </SafeAreaView>
