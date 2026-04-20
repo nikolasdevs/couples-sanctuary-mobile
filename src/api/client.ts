@@ -1,27 +1,18 @@
-import * as SecureStore from "expo-secure-store";
+import { firebaseAuth } from "@/lib/firebase";
 
 const BASE_URL = "https://sanctuary.visit2nigeria.com";
-const TOKEN_KEY = "sanctuary_token";
 
-/** Store the JWT token securely on-device */
-export async function setToken(token: string) {
-  await SecureStore.setItemAsync(TOKEN_KEY, token);
+/** Get the current Firebase ID token, or null if not signed in. */
+async function getIdToken(): Promise<string | null> {
+  return firebaseAuth.currentUser?.getIdToken() ?? null;
 }
 
-export async function getToken(): Promise<string | null> {
-  return SecureStore.getItemAsync(TOKEN_KEY);
-}
-
-export async function clearToken() {
-  await SecureStore.deleteItemAsync(TOKEN_KEY);
-}
-
-/** Authenticated fetch wrapper */
+/** Authenticated fetch wrapper — attaches the Firebase Bearer token automatically. */
 export async function apiFetch<T = unknown>(
   path: string,
   options: RequestInit = {},
 ): Promise<{ data: T | null; error: string | null; status: number }> {
-  const token = await getToken();
+  const token = await getIdToken();
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -39,14 +30,6 @@ export async function apiFetch<T = unknown>(
     });
 
     const data = await res.json().catch(() => null);
-
-    // Extract token from response body (login/signup return it)
-    if (data && typeof data === "object" && "token" in data) {
-      const bodyToken = (data as { token?: string }).token;
-      if (bodyToken) {
-        await setToken(bodyToken);
-      }
-    }
 
     if (!res.ok) {
       return {

@@ -9,7 +9,8 @@ export default function App() {
   const hydrate = useAuthStore((s) => s.hydrate);
 
   useEffect(() => {
-    hydrate();
+    const unsubscribe = hydrate();
+    return unsubscribe;
   }, [hydrate]);
 
   return (

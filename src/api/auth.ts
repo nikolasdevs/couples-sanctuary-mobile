@@ -1,4 +1,4 @@
-import { apiFetch, clearToken } from "./client";
+import { apiFetch } from "./client";
 
 export interface User {
   id: number;
@@ -16,25 +16,6 @@ export interface CoupleInfo {
 export interface MeResponse {
   user: User;
   couple: CoupleInfo | null;
-}
-
-export async function apiSignup(email: string, password: string, name: string) {
-  return apiFetch<{ user: User }>("/api/auth/signup", {
-    method: "POST",
-    body: JSON.stringify({ email, password, name }),
-  });
-}
-
-export async function apiLogin(email: string, password: string) {
-  return apiFetch<{ user: User }>("/api/auth/login", {
-    method: "POST",
-    body: JSON.stringify({ email, password }),
-  });
-}
-
-export async function apiLogout() {
-  await apiFetch("/api/auth/logout", { method: "POST" });
-  await clearToken();
 }
 
 export async function apiGetMe() {
