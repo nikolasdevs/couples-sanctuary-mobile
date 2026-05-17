@@ -1,18 +1,27 @@
-import { firebaseAuth } from "@/lib/firebase";
+import * as SecureStore from "expo-secure-store";
 
 const BASE_URL = "https://sanctuary.visit2nigeria.com";
+export const TOKEN_KEY = "sanctuary_jwt";
 
-/** Get the current Firebase ID token, or null if not signed in. */
-async function getIdToken(): Promise<string | null> {
-  return firebaseAuth.currentUser?.getIdToken() ?? null;
+export async function getStoredToken(): Promise<string | null> {
+  return SecureStore.getItemAsync(TOKEN_KEY);
 }
 
-/** Authenticated fetch wrapper — attaches the Firebase Bearer token automatically. */
+export async function setStoredToken(token: string): Promise<void> {
+  await SecureStore.setItemAsync(TOKEN_KEY, token);
+}
+
+export async function clearStoredToken(): Promise<void> {
+  await SecureStore.deleteItemAsync(TOKEN_KEY);
+}
+
 export async function apiFetch<T = unknown>(
   path: string,
   options: RequestInit = {},
 ): Promise<{ data: T | null; error: string | null; status: number }> {
-  const token = await getIdToken();
+  const token = await getStoredToken();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10_000);
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -27,7 +36,9 @@ export async function apiFetch<T = unknown>(
     const res = await fetch(`${BASE_URL}${path}`, {
       ...options,
       headers,
+      signal: controller.signal,
     });
+    clearTimeout(timeout);
 
     const data = await res.json().catch(() => null);
 
@@ -41,6 +52,7 @@ export async function apiFetch<T = unknown>(
 
     return { data: data as T, error: null, status: res.status };
   } catch {
+    clearTimeout(timeout);
     return { data: null, error: "Network error. Check your connection.", status: 0 };
   }
 }
