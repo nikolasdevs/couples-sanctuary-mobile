@@ -30,7 +30,11 @@
       "Read(//Users/immanuelesan/**)",
       "Bash(mkdir -p /Users/immanuelesan/couples-sanctuary/app/api/auth/forgot-password)",
       "Bash(mkdir -p /Users/immanuelesan/couples-sanctuary/app/api/auth/reset-password)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/forgot-password -H \"Content-Type: application/json\" -d '{\"email\":\"test@test.com\"}')",
+      "Bash(curl -s -X POST https://sanctuary.visit2nigeria.com/api/auth/forgot-password -H \"Content-Type: application/json\" -d '{\"email\":\"test@test.com\"}')",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
