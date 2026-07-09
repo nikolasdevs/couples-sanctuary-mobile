@@ -1,0 +1,117 @@
+import { useEffect, useState } from "react";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Link, useRouter } from "expo-router";
+
+import { useAuth } from "@/context/AuthContext";
+import { AuthTextField } from "@/components/AuthTextField";
+import { PrimaryButton } from "@/components/PrimaryButton";
+
+export default function SignupScreen() {
+  const { signup, user, loading: authLoading } = useAuth();
+  const router = useRouter();
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && user) router.replace("/dashboard");
+  }, [user, authLoading, router]);
+
+  if (authLoading || user) return null;
+
+  const handleSubmit = async () => {
+    setError("");
+    setLoading(true);
+    const result = await signup(email, password, name);
+    if (result.error) {
+      setError(result.error);
+      setLoading(false);
+    } else {
+      router.push("/dashboard");
+    }
+  };
+
+  return (
+    <SafeAreaView className="flex-1 bg-bg" edges={["top", "bottom"]}>
+    <KeyboardAvoidingView
+      className="flex-1"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <ScrollView
+        contentContainerClassName="flex-grow items-center justify-center px-6 py-10"
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="w-full max-w-sm">
+          <Link href="/" className="mb-8 text-xs uppercase tracking-widest text-zinc-500">
+            ← Back
+          </Link>
+
+          <Text className="text-2xl font-semibold tracking-tight text-text">
+            Create your account
+          </Text>
+          <Text className="mt-2 text-sm text-muted">
+            Start your journey together
+          </Text>
+
+          {error ? (
+            <View className="mt-4 w-full rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-2.5">
+              <Text className="text-center text-sm text-red-400">{error}</Text>
+            </View>
+          ) : null}
+
+          <View className="mt-6 w-full gap-4">
+            <AuthTextField
+              label="Your name"
+              value={name}
+              onChangeText={setName}
+              placeholder="Alex"
+              autoComplete="name"
+            />
+            <AuthTextField
+              label="Email"
+              value={email}
+              onChangeText={setEmail}
+              placeholder="you@example.com"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+            />
+            <AuthTextField
+              label="Password"
+              value={password}
+              onChangeText={setPassword}
+              placeholder="At least 8 characters"
+              secureTextEntry
+              autoComplete="new-password"
+            />
+
+            <PrimaryButton
+              label="Create Account"
+              loadingLabel="Creating account…"
+              loading={loading}
+              onPress={handleSubmit}
+            />
+          </View>
+
+          <Text className="mt-6 text-center text-sm text-muted">
+            Already have an account?{" "}
+            <Link href="/login" className="text-accent">
+              Sign in
+            </Link>
+          </Text>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
